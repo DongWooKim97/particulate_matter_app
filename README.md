@@ -1,16 +1,12 @@
-# particulate_matter_app
+## 플러터로 제작한 미세먼지 정보 앱입니다.
 
-A new Flutter project.
+### 프로젝트 목표 (예상 구현도)
 
-## Getting Started
+![img.png](img.png)
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+- CustomScrollView 위젯 실전 사용!
+- Drawer 위젯 사용
+- Dio로 HTTP 요청하기
+- Hive로 NoSQL 데이터관리
+- 오프라인 지원
+- 정부 오픈 API알아보기

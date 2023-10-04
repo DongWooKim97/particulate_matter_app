@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:particulate_matter_app/component/card_title.dart';
+import 'package:particulate_matter_app/component/main_card.dart';
 
 import '../constant/colors.dart';
 import 'main_stat.dart';
@@ -10,42 +12,15 @@ class CategoryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       height: 160,
-      child: Card(
-        margin: const EdgeInsets.symmetric(horizontal: 16.0),
-        // 양쪽에 다 설정할 수 있는게 symnetric
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(// 카드를 한번에 깎기
-              Radius.circular(16.0) // 카드를 한번에 깎기
-              ),
-        ),
-        // ShapeBorder --> Abstract Class , extend하는 애들만 사용가능
-        color: lightColor,
+      child: MainCard( // 카드를 컴포넌트로 뺴고 외부에서 child값을 받음.
         child: LayoutBuilder(
           builder: (context, constraint) {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Container(
-                  decoration: const BoxDecoration(
-                      color: darkColor,
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(16.0),
-                        topRight: Radius.circular(16.0),
-                      )),
-                  child: const Padding(
-                    padding: EdgeInsets.all(4.0),
-                    child: Text(
-                      '종류별 통계',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w700,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ),
-                //스크롤 가능한 위젯들은 Column안에서 썼을때 무조건 Expanded안에 넣어줘야한다 무조건!!!!
+                CardTitle(title: '종류별 통계'),
                 Expanded(
+                  //스크롤 가능한 위젯들은 Column안에서 썼을때 무조건 Expanded안에 넣어줘야한다 무조건!!!!
                   child: ListView(
                     // 디폴트는 수직 vertical // 처음에 이렇게만 설정하면 아래와 같은 오류 발생
                     // Horizontal viewport was given unbounded height. -> 리스트뷰의 높이가 무한정으로 늘어났다.unbounded

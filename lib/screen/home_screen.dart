@@ -8,6 +8,7 @@ import 'package:particulate_matter_app/component/main_card.dart';
 import 'package:particulate_matter_app/constant/colors.dart';
 import 'package:particulate_matter_app/constant/data.dart';
 import 'package:particulate_matter_app/model/stat_model.dart';
+import 'package:particulate_matter_app/repository/stat_repository.dart';
 
 import '../component/main_drawer.dart';
 
@@ -27,29 +28,13 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   fetchData() async {
-    //get이면 GET요청, post면 POST요청
-    final response = await Dio().get(
-        'http://apis.data.go.kr/B552584/ArpltnStatsSvc/getCtprvnMesureLIst',
-        queryParameters: {
-          'serviceKey': serviceKey,
-          'returnType': 'json',
-          'numOfRows': 30,
-          'pageNo': 1,
-          'itemCode': 'PM10',
-          'dataGubun': 'HOUR',
-          'searchCondition': 'WEEK',
-        });
-
-    print(
-      response.data['response']['body']['items'].map(
-        (item) => StatModel.fromJson(json: item),
-      ),
-    );
+    final statModels = await StatRepository.fetchData();
+    print(statModels);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return const Scaffold(
       backgroundColor: primaryColor,
       drawer: MainDrawer(),
       body: SafeArea(
@@ -57,8 +42,6 @@ class _HomeScreenState extends State<HomeScreen> {
           slivers: [
             MainAppBar(),
             SliverToBoxAdapter(
-              // Sliver안 위젯 위치 배정 -> 그대로 Stay
-              // Sliver안에 Sliver화 해서 넣을 수 있게 해주는 위젯
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -74,3 +57,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
+
+
+// Sliver안 위젯 위치 배정 -> 그대로 Stay
+// Sliver안에 Sliver화 해서 넣을 수 있게 해주는 위젯

@@ -7,6 +7,7 @@ import 'package:particulate_matter_app/component/main_app_bar.dart';
 import 'package:particulate_matter_app/component/main_card.dart';
 import 'package:particulate_matter_app/constant/colors.dart';
 import 'package:particulate_matter_app/constant/data.dart';
+import 'package:particulate_matter_app/model/stat_model.dart';
 
 import '../component/main_drawer.dart';
 
@@ -25,23 +26,25 @@ class _HomeScreenState extends State<HomeScreen> {
     fetchData();
   }
 
-  fetchData() async{
+  fetchData() async {
     //get이면 GET요청, post면 POST요청
-    final response  = await Dio().get(
-      'http://apis.data.go.kr/B552584/ArpltnStatsSvc/getCtprvnMesureLIst',
-      queryParameters: {
-        'serviceKey' : serviceKey,
-        'returnType' : 'json',
-        'numOfRows' : 30,
-        'pageNo' : 1,
-        'itemCode' : 'PM10',
-        'dataGubun' : 'HOUR',
-        'searchCondition' : 'WEEK',
-      }
+    final response = await Dio().get(
+        'http://apis.data.go.kr/B552584/ArpltnStatsSvc/getCtprvnMesureLIst',
+        queryParameters: {
+          'serviceKey': serviceKey,
+          'returnType': 'json',
+          'numOfRows': 30,
+          'pageNo': 1,
+          'itemCode': 'PM10',
+          'dataGubun': 'HOUR',
+          'searchCondition': 'WEEK',
+        });
+
+    print(
+      response.data['response']['body']['items'].map(
+        (item) => StatModel.fromJson(json: item),
+      ),
     );
-
-    print(response.data);
-
   }
 
   @override

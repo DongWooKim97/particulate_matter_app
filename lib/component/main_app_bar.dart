@@ -3,6 +3,7 @@ import 'package:particulate_matter_app/model/stat_model.dart';
 
 import '../constant/colors.dart';
 import '../model/status_model.dart';
+import '../utils/data_utils.dart';
 
 class MainAppBar extends StatelessWidget {
   final StatusModel status; // 가져온 Statmodel을 기준으로 단계를 나누는 기준을 정의해놓은것.
@@ -39,7 +40,7 @@ class MainAppBar extends StatelessWidget {
                 ),
               ),
               Text(
-                getTimeFromDateTime(dateTime: stat.dataTime),
+                DataUtils.getTimeFromDateTime(dateTime: stat.dataTime),
                 style: ts.copyWith(
                   fontSize: 20.0,
                 ),
@@ -71,14 +72,4 @@ class MainAppBar extends StatelessWidget {
       ),
     );
   }
-
-  String getTimeFromDateTime({required DateTime dateTime}) {
-    return '${dateTime.year}-${getTimeFormat(dateTime.month)}-${getTimeFormat(dateTime.day)} ${getTimeFormat(dateTime.hour)}:${getTimeFormat(dateTime.minute)}';
-  }
-
-  String getTimeFormat(int number) {
-    return number.toString().padLeft(2, '0');
-    
-  }
-
 }

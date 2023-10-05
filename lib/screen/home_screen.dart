@@ -10,6 +10,7 @@ import 'package:particulate_matter_app/constant/data.dart';
 import 'package:particulate_matter_app/constant/status_level.dart';
 import 'package:particulate_matter_app/model/stat_model.dart';
 import 'package:particulate_matter_app/repository/stat_repository.dart';
+import 'package:particulate_matter_app/utils/data_utils.dart';
 
 import '../component/main_drawer.dart';
 
@@ -55,10 +56,13 @@ class _HomeScreenState extends State<HomeScreen> {
             // 이건 가장 최근 데이터 . 가장 최근 데이터를 기준으로 우리가 statusLevel이 어느 구간인지를 산정해야함. 맨아래참조.
             StatModel recentStat = stats[0];
 
-            final status = statusLevel.where((element) =>
-                element.minFineDust <= recentStat.seoul).last; // where = > 모든 것을 필터링. 서울의 미세먼지값보다 작은 애들만 필터링.
-
-            print(recentStat.seoul);
+            // final status = statusLevel
+            //     .where((element) => element.minFineDust <= recentStat.seoul)
+            //     .last; // where = > 모든 것을 필터링. 서울의 미세먼지값보다 작은 애들만 필터링. 우선은 미세먼지만 비교중임.
+            final status = DataUtils.getStatusFromItemCodeAndValue(
+              value: recentStat.seoul,
+              itemCode: ItemCode.PM10,
+            );
 
             return CustomScrollView(
               slivers: [

@@ -101,7 +101,6 @@ class _HomeScreenState extends State<HomeScreen> {
               );
             }).toList();
 
-
             return Container(
               color: status.primaryColor,
               child: CustomScrollView(
@@ -122,10 +121,23 @@ class _HomeScreenState extends State<HomeScreen> {
                           lightColor: status.lightColor,
                         ),
                         SizedBox(height: 16.0),
-                        HourlyCard(
-                          darkColor: status.darkColor,
-                          lightColor: status.lightColor,
-                        ),
+                        ...stats.keys.map(
+                          (itemCode) {
+                            final stat =stats[itemCode]!;
+
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 16.0),
+                              child: HourlyCard(
+                                darkColor: status.darkColor,
+                                lightColor: status.lightColor,
+                                region: region,
+                                category: DataUtils.getItemCodeKoreanString(itemCode: itemCode,),
+                                stats: stat,
+                              ),
+                            );
+                          }
+                        ).toList(),
+                        SizedBox(height: 16.0),
                       ],
                     ), // 안에 들어가는 위젯들은 다 Sliver화 돼서 들어감.
                   ),

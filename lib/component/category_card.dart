@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:particulate_matter_app/component/card_title.dart';
 import 'package:particulate_matter_app/component/main_card.dart';
 
-import '../constant/colors.dart';
 import 'main_stat.dart';
 
 class CategoryCard extends StatelessWidget {

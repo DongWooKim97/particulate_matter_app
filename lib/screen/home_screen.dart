@@ -1,13 +1,8 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:particulate_matter_app/component/card_title.dart';
 import 'package:particulate_matter_app/component/category_card.dart';
 import 'package:particulate_matter_app/component/hourly_card.dart';
 import 'package:particulate_matter_app/component/main_app_bar.dart';
-import 'package:particulate_matter_app/component/main_card.dart';
 import 'package:particulate_matter_app/constant/colors.dart';
-import 'package:particulate_matter_app/constant/data.dart';
-import 'package:particulate_matter_app/constant/status_level.dart';
 import 'package:particulate_matter_app/model/stat_model.dart';
 import 'package:particulate_matter_app/repository/stat_repository.dart';
 import 'package:particulate_matter_app/utils/data_utils.dart';

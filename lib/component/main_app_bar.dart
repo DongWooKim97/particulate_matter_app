@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:particulate_matter_app/model/stat_model.dart';
 
-import '../constant/colors.dart';
 import '../model/status_model.dart';
 import '../utils/data_utils.dart';
 

@@ -8,10 +8,14 @@ import 'main_stat.dart';
 
 class CategoryCard extends StatelessWidget {
   final String region;
+  final Color darkColor;
+  final Color lightColor;
   final List<StatAndStatusModel> models;
 
   const CategoryCard({
     required this.region,
+    required this.darkColor,
+    required this.lightColor,
     required this.models,
     Key? key,
   }) : super(key: key);
@@ -21,12 +25,16 @@ class CategoryCard extends StatelessWidget {
     return SizedBox(
       height: 160,
       child: MainCard(
+        backgroundColor: lightColor,
         // 카드를 컴포넌트로 뺴고 외부에서 child값을 받음.
         child: LayoutBuilder(builder: (context, constraint) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              CardTitle(title: '종류별 통계'),
+              CardTitle(
+                title: '종류별 통계',
+                backgroundColor: darkColor,
+              ),
               Expanded(
                 //스크롤 가능한 위젯들은 Column안에서 썼을때 무조건 Expanded안에 넣어줘야한다 무조건!!!!
                 child: ListView(

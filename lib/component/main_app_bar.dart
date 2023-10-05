@@ -8,11 +8,15 @@ class MainAppBar extends StatelessWidget {
   final String region;
   final StatusModel status; // 가져온 Statmodel을 기준으로 단계를 나누는 기준을 정의해놓은것.
   final StatModel stat; // 실제값. API에서 요청해서 받아오는 값들을 다트 언어 클래스로 만들어놓은 것.
+  final DateTime dateTime;
+  final bool isExpanded;
 
   const MainAppBar({
     required this.region,
     required this.status,
     required this.stat,
+    required this.dateTime,
+    required this.isExpanded,
     Key? key,
   }) : super(key: key);
 
@@ -25,6 +29,11 @@ class MainAppBar extends StatelessWidget {
 
     return SliverAppBar(
       expandedHeight: 500,
+      pinned: true,
+      title: isExpanded
+          ? null
+          : Text('${region} ${DataUtils.getTimeFromDateTime(dateTime: dateTime)}'),
+      centerTitle: true,
       backgroundColor: status.primaryColor,
       flexibleSpace: FlexibleSpaceBar(
         background: Container(

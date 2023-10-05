@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../constant/colors.dart';
-
 class CardTitle extends StatelessWidget {
   final Color backgroundColor;
   final String title;

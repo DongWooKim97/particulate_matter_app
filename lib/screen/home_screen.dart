@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:particulate_matter_app/component/category_card.dart';
 import 'package:particulate_matter_app/component/hourly_card.dart';
 import 'package:particulate_matter_app/component/main_app_bar.dart';
-import 'package:particulate_matter_app/constant/colors.dart';
-import 'package:particulate_matter_app/constant/status_level.dart';
 import 'package:particulate_matter_app/model/stat_and_status_model.dart';
 import 'package:particulate_matter_app/model/stat_model.dart';
 import 'package:particulate_matter_app/repository/stat_repository.dart';
@@ -21,6 +19,22 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   String region = regions[0];
+  bool isExpanded = true;
+  ScrollController scrollController = ScrollController();
+
+  @override
+  void initState() {
+    // initState에서 모든 Listener들을 등록한다.
+    super.initState();
+    scrollController.addListener((scrollListener));
+  }
+
+  @override
+  void dispose() {
+    scrollController.removeListener((scrollListener));
+    scrollController.dispose();
+    super.dispose();
+  }
 
   Future<Map<ItemCode, List<StatModel>>> fetchData() async {
     Map<ItemCode, List<StatModel>> stats = {};
@@ -49,66 +63,86 @@ class _HomeScreenState extends State<HomeScreen> {
     return stats;
   }
 
+  scrollListener() {
+    // 현재 스크롤하는 위치가 어딘지 정확히 알 수 있다. expandedHeight(500)에서 Appbar의 높이를 뺴야한다.
+    bool isExpanded = scrollController.offset < 500 - kToolbarHeight;
+
+    if (isExpanded != this.isExpanded) {
+      setState(() {
+        this.isExpanded = isExpanded;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      drawer: MainDrawer(
-        selectedRegion: region,
-        onRegionTap: (String region) {
-          setState(() {
-            this.region = region;
-          });
-          Navigator.of(context).pop(); // 화면에서 뒤로가기를 할 떄 사용하던 방식!
-        },
-      ),
-      body: SafeArea(
-        child: FutureBuilder<Map<ItemCode, List<StatModel>>>(
-          future: fetchData(),
-          builder: (context, snapshot) {
-            //에러가 있을 때
-            if (snapshot.hasError) {
-              return const Center(
+    return SafeArea(
+      child: FutureBuilder<Map<ItemCode, List<StatModel>>>(
+        future: fetchData(),
+        builder: (context, snapshot) {
+          //에러가 있을 때
+          if (snapshot.hasError) {
+            return Scaffold(
+              body: Center(
                 child: Text('에러가 있습니다.'),
-              );
-            }
-
-            if (!snapshot.hasData) {
-              //로딩 상태 -> 데이터가 없을 떄 데이터를 받아오기 위한 로딩상태!
-              return const Center(
-                child: CircularProgressIndicator(),
-              );
-            }
-
-            // 이건 가장 최근 데이터 . 가장 최근 데이터를 기준으로 우리가 statusLevel이 어느 구간인지를 산정해야함. 맨아래참조.
-            Map<ItemCode, List<StatModel>> stats = snapshot.data!;
-            StatModel pm10RecentStat = stats[ItemCode.PM10]![0];
-
-            // 미세먼지 최근 데이터의 현재 상태
-            final status = DataUtils.getStatusFromItemCodeAndValue(
-              value: pm10RecentStat.seoul,
-              itemCode: ItemCode.PM10,
+              ),
             );
+          }
 
-            final ssModel = stats.keys.map((key) {
-              final value = stats[key]!;
-              final stat = value[0];
+          if (!snapshot.hasData) {
+            //로딩 상태 -> 데이터가 없을 떄 데이터를 받아오기 위한 로딩상태!
+            return Scaffold(
+              body: Center(
+                child: CircularProgressIndicator(),
+              ),
+            );
+          }
 
-              return StatAndStatusModel(
-                itemCode: key,
-                status: DataUtils.getStatusFromItemCodeAndValue(
-                    value: stat.getLevelFromRegion(region), itemCode: key),
-                stat: stat,
-              );
-            }).toList();
+          // 이건 가장 최근 데이터 . 가장 최근 데이터를 기준으로 우리가 statusLevel이 어느 구간인지를 산정해야함. 맨아래참조.
+          Map<ItemCode, List<StatModel>> stats = snapshot.data!;
+          StatModel pm10RecentStat = stats[ItemCode.PM10]![0];
 
-            return Container(
+          // 미세먼지 최근 데이터의 현재 상태
+          final status = DataUtils.getStatusFromItemCodeAndValue(
+            value: pm10RecentStat.seoul,
+            itemCode: ItemCode.PM10,
+          );
+
+          final ssModel = stats.keys.map((key) {
+            final value = stats[key]!;
+            final stat = value[0];
+
+            return StatAndStatusModel(
+              itemCode: key,
+              status: DataUtils.getStatusFromItemCodeAndValue(
+                  value: stat.getLevelFromRegion(region), itemCode: key),
+              stat: stat,
+            );
+          }).toList();
+
+          return Scaffold(
+            drawer: MainDrawer(
+              darkColor: status.darkColor,
+              lightColor: status.lightColor,
+              selectedRegion: region,
+              onRegionTap: (String region) {
+                setState(() {
+                  this.region = region;
+                });
+                Navigator.of(context).pop(); // 화면에서 뒤로가기를 할 떄 사용하던 방식!
+              },
+            ),
+            body: Container(
               color: status.primaryColor,
               child: CustomScrollView(
+                controller: scrollController,
                 slivers: [
                   MainAppBar(
+                    isExpanded: isExpanded,
                     region: region,
                     stat: pm10RecentStat,
                     status: status,
+                    dateTime: pm10RecentStat.dataTime,
                   ),
                   SliverToBoxAdapter(
                     child: Column(
@@ -121,31 +155,31 @@ class _HomeScreenState extends State<HomeScreen> {
                           lightColor: status.lightColor,
                         ),
                         SizedBox(height: 16.0),
-                        ...stats.keys.map(
-                          (itemCode) {
-                            final stat =stats[itemCode]!;
+                        ...stats.keys.map((itemCode) {
+                          final stat = stats[itemCode]!;
 
-                            return Padding(
-                              padding: const EdgeInsets.only(bottom: 16.0),
-                              child: HourlyCard(
-                                darkColor: status.darkColor,
-                                lightColor: status.lightColor,
-                                region: region,
-                                category: DataUtils.getItemCodeKoreanString(itemCode: itemCode,),
-                                stats: stat,
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 16.0),
+                            child: HourlyCard(
+                              darkColor: status.darkColor,
+                              lightColor: status.lightColor,
+                              region: region,
+                              category: DataUtils.getItemCodeKoreanString(
+                                itemCode: itemCode,
                               ),
-                            );
-                          }
-                        ).toList(),
+                              stats: stat,
+                            ),
+                          );
+                        }).toList(),
                         SizedBox(height: 16.0),
                       ],
                     ), // 안에 들어가는 위젯들은 다 Sliver화 돼서 들어감.
                   ),
                 ],
               ),
-            );
-          },
-        ),
+            ),
+          );
+        },
       ),
     );
   }

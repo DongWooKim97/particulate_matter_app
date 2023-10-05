@@ -20,7 +20,7 @@ class StatusModel {
   final Color detailFontColor;
 
   //이모티콘 이미지
-  final String imgPath;
+  final String imagePath;
 
   // 코멘트
   final String comment;
@@ -50,7 +50,7 @@ class StatusModel {
     required this.darkColor,
     required this.lightColor,
     required this.detailFontColor,
-    required this.imgPath,
+    required this.imagePath,
     required this.comment,
     required this.minFineDust,
     required this.minUltraFineDust,

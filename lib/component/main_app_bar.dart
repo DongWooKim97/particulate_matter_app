@@ -1,20 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:particulate_matter_app/model/stat_model.dart';
 
 import '../constant/colors.dart';
+import '../model/status_model.dart';
 
 class MainAppBar extends StatelessWidget {
-  const MainAppBar({Key? key}) : super(key: key);
+  final StatusModel status; // 가져온 Statmodel을 기준으로 단계를 나누는 기준을 정의해놓은것.
+  final StatModel stat; // 실제값. API에서 요청해서 받아오는 값들을 다트 언어 클래스로 만들어놓은 것.
+
+  const MainAppBar({
+    required this.status,
+    required this.stat,
+    Key? key,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final ts = const TextStyle(
+    const ts = TextStyle(
       color: Colors.white,
       fontSize: 30.0,
     );
 
     return SliverAppBar(
       expandedHeight: 500,
-      backgroundColor: primaryColor,
+      backgroundColor: status.primaryColor,
       flexibleSpace: FlexibleSpaceBar(
         background: Container(
           // padding - container 내부 Gap , margin - padding처럼 컨테이너 안이 아니라 밖에.
@@ -23,26 +32,26 @@ class MainAppBar extends StatelessWidget {
           child: Column(
             children: [
               Text(
-                '서울',
+                '서울', // 따로 관리해줘야함.
                 style: ts.copyWith(
                   fontSize: 40.0,
                   fontWeight: FontWeight.w700,
                 ),
               ),
               Text(
-                DateTime.now().toString(),
+                getTimeFromDateTime(dateTime: stat.dataTime),
                 style: ts.copyWith(
                   fontSize: 20.0,
                 ),
               ),
               const SizedBox(height: 20.0),
               Image.asset(
-                'asset/img/mediocre.png',
+                status.imagePath,
                 width: MediaQuery.of(context).size.width / 2,
               ),
               const SizedBox(height: 20.0),
               Text(
-                '보통',
+                status.label,
                 style: ts.copyWith(
                   fontSize: 40.0,
                   fontWeight: FontWeight.w700,
@@ -50,7 +59,7 @@ class MainAppBar extends StatelessWidget {
               ),
               const SizedBox(height: 8.0),
               Text(
-                '나쁘지 않네요!',
+                status.comment,
                 style: ts.copyWith(
                   fontSize: 20.0,
                   fontWeight: FontWeight.w700,
@@ -62,4 +71,14 @@ class MainAppBar extends StatelessWidget {
       ),
     );
   }
+
+  String getTimeFromDateTime({required DateTime dateTime}) {
+    return '${dateTime.year}-${getTimeFormat(dateTime.month)}-${getTimeFormat(dateTime.day)} ${getTimeFormat(dateTime.hour)}:${getTimeFormat(dateTime.minute)}';
+  }
+
+  String getTimeFormat(int number) {
+    return number.toString().padLeft(2, '0');
+    
+  }
+
 }

@@ -6,10 +6,12 @@ import '../model/status_model.dart';
 import '../utils/data_utils.dart';
 
 class MainAppBar extends StatelessWidget {
+  final String region;
   final StatusModel status; // 가져온 Statmodel을 기준으로 단계를 나누는 기준을 정의해놓은것.
   final StatModel stat; // 실제값. API에서 요청해서 받아오는 값들을 다트 언어 클래스로 만들어놓은 것.
 
   const MainAppBar({
+    required this.region,
     required this.status,
     required this.stat,
     Key? key,
@@ -33,7 +35,7 @@ class MainAppBar extends StatelessWidget {
           child: Column(
             children: [
               Text(
-                '서울', // 따로 관리해줘야함.
+                region, // 따로 관리해줘야함.
                 style: ts.copyWith(
                   fontSize: 40.0,
                   fontWeight: FontWeight.w700,

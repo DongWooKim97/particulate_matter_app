@@ -3,8 +3,13 @@ import 'package:particulate_matter_app/constant/colors.dart';
 
 import '../constant/regions.dart';
 
+typedef OnRegionTap = void Function(String region);
+
 class MainDrawer extends StatelessWidget {
-  const MainDrawer({Key? key}) : super(key: key);
+  final OnRegionTap onRegionTap;
+  final String selectedRegion;
+
+  const MainDrawer({required this.onRegionTap,required this.selectedRegion,  Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -22,18 +27,22 @@ class MainDrawer extends StatelessWidget {
               ),
             ),
           ),
-          ...regions.map(
-            (e) => ListTile(
-              tileColor: Colors.white,
-              selectedTileColor: lightColor,
-              // 선택된 배경색
-              selectedColor: Colors.black,
-              // 선택된 글자색
-              selected: e == '서울',
-              onTap: () {},
-              title: Text(e),
-            ),
-          ).toList(),
+          ...regions
+              .map(
+                (e) => ListTile(
+                  tileColor: Colors.white,
+                  selectedTileColor: lightColor,
+                  // 선택된 배경색
+                  selectedColor: Colors.black,
+                  // 선택된 글자색
+                  selected: e == selectedRegion,
+                  onTap: () {
+                    onRegionTap(e);
+                  },
+                  title: Text(e),
+                ),
+              )
+              .toList(),
         ],
       ), // 위아래로 스크롤이 되어야하기떄문에 ListView()
     );

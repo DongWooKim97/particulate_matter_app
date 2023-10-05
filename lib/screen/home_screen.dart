@@ -13,6 +13,7 @@ import 'package:particulate_matter_app/repository/stat_repository.dart';
 import 'package:particulate_matter_app/utils/data_utils.dart';
 
 import '../component/main_drawer.dart';
+import '../constant/regions.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -22,6 +23,8 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  String region = regions[0];
+
   Future<List<StatModel>> fetchData() async {
     final statModels =
         await StatRepository.fetchData(); // 레포지토리를 통해 List로 받게끔 해놨음 .
@@ -33,7 +36,15 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: primaryColor,
-      drawer: MainDrawer(),
+      drawer: MainDrawer(
+        selectedRegion: region,
+        onRegionTap: (String region) {
+          setState(() {
+            this.region = region;
+          });
+          Navigator.of(context).pop(); // 화면에서 뒤로가기를 할 떄 사용하던 방식!
+        },
+      ),
       body: SafeArea(
         child: FutureBuilder<List<StatModel>>(
           future: fetchData(),
@@ -67,6 +78,7 @@ class _HomeScreenState extends State<HomeScreen> {
             return CustomScrollView(
               slivers: [
                 MainAppBar(
+                  region: region,
                   stat: recentStat,
                   status: status,
                 ),

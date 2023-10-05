@@ -1,5 +1,3 @@
-
-
 enum ItemCode {
   //미세먼지
   PM10,

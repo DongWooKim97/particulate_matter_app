@@ -3,6 +3,7 @@ import 'package:particulate_matter_app/component/category_card.dart';
 import 'package:particulate_matter_app/component/hourly_card.dart';
 import 'package:particulate_matter_app/component/main_app_bar.dart';
 import 'package:particulate_matter_app/constant/colors.dart';
+import 'package:particulate_matter_app/constant/status_level.dart';
 import 'package:particulate_matter_app/model/stat_model.dart';
 import 'package:particulate_matter_app/repository/stat_repository.dart';
 import 'package:particulate_matter_app/utils/data_utils.dart';
@@ -20,11 +21,18 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   String region = regions[0];
 
-  Future<List<StatModel>> fetchData() async {
-    final statModels =
-        await StatRepository.fetchData(); // 레포지토리를 통해 List로 받게끔 해놨음 .
+  Future<Map<ItemCode, List<StatModel>>> fetchData() async {
+    Map<ItemCode, List<StatModel>> stats = {};
 
-    return statModels;
+    for (ItemCode itemCode in ItemCode.values) {
+      final statModels = await StatRepository.fetchData(
+        itemCode: itemCode,
+      );
+      stats.addAll({
+        itemCode: statModels,
+      });
+    }
+    return stats;
   }
 
   @override
@@ -41,7 +49,7 @@ class _HomeScreenState extends State<HomeScreen> {
         },
       ),
       body: SafeArea(
-        child: FutureBuilder<List<StatModel>>(
+        child: FutureBuilder<Map<ItemCode, List<StatModel>>>(
           future: fetchData(),
           builder: (context, snapshot) {
             //에러가 있을 때
@@ -58,15 +66,15 @@ class _HomeScreenState extends State<HomeScreen> {
               );
             }
 
-            List<StatModel> stats = snapshot.data!;
+            Map<ItemCode, List<StatModel>> stats = snapshot.data!;
             // 이건 가장 최근 데이터 . 가장 최근 데이터를 기준으로 우리가 statusLevel이 어느 구간인지를 산정해야함. 맨아래참조.
-            StatModel recentStat = stats[0];
+            StatModel pm10RecentStat = stats[ItemCode.PM10]![0];
 
             // final status = statusLevel
             //     .where((element) => element.minFineDust <= recentStat.seoul)
             //     .last; // where = > 모든 것을 필터링. 서울의 미세먼지값보다 작은 애들만 필터링. 우선은 미세먼지만 비교중임.
             final status = DataUtils.getStatusFromItemCodeAndValue(
-              value: recentStat.seoul,
+              value: pm10RecentStat.seoul,
               itemCode: ItemCode.PM10,
             );
 
@@ -74,7 +82,7 @@ class _HomeScreenState extends State<HomeScreen> {
               slivers: [
                 MainAppBar(
                   region: region,
-                  stat: recentStat,
+                  stat: pm10RecentStat,
                   status: status,
                 ),
                 const SliverToBoxAdapter(
@@ -108,3 +116,16 @@ class _HomeScreenState extends State<HomeScreen> {
 // 1-5 6-10 11-15
 // 7 , 우리는 최솟값만 들고있는데, 최솟값 하나하나가 리스트에 들어있는 값이라고 했을 떄, [ 1, 6, 11, 16, .. ]
 // 최솟값보다 작은 애들만 필터링했을 때 그 중 가장 높은 숫자를 가져오면 현재 우리가 들고있는 숫자의 range를 알 수 있따.
+
+
+// 70번쨰 줄 이해
+
+/*
+            Map<ItemCode, List<StatModel>> stats = snapshot.data!;
+            // 이건 가장 최근 데이터 . 가장 최근 데이터를 기준으로 우리가 statusLevel이 어느 구간인지를 산정해야함. 맨아래참조.
+            StatModel pm10RecentStat = stats[ItemCode.PM10]![0];
+
+ -> Map형태인데, ItemCode값들을 키값으로 넣고, 그 값들에 해당되는 데이터들을 List에 담음.
+ -> 맵에다가 갖고오고 싶은 ItemCode를 값을 넣으면 해당하는 모든 통계들을 가져올 수 있느넋.
+ -> 그중 0번 데이터를 가져오면 가장 최근 데이터를 가져오는 것이다.
+ */

@@ -22,7 +22,7 @@ class DataUtils {
     }
   }
 
-  static String itemCodeKoreanString({required ItemCode itemCode}) {
+  static String getItemCodeKoreanString({required ItemCode itemCode}) {
     switch (itemCode) {
       case ItemCode.PM10:
         return '미세먼지';

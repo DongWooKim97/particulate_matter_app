@@ -4,6 +4,7 @@ import 'package:particulate_matter_app/component/hourly_card.dart';
 import 'package:particulate_matter_app/component/main_app_bar.dart';
 import 'package:particulate_matter_app/constant/colors.dart';
 import 'package:particulate_matter_app/constant/status_level.dart';
+import 'package:particulate_matter_app/model/stat_and_status_model.dart';
 import 'package:particulate_matter_app/model/stat_model.dart';
 import 'package:particulate_matter_app/repository/stat_repository.dart';
 import 'package:particulate_matter_app/utils/data_utils.dart';
@@ -28,7 +29,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
     for (ItemCode itemCode in ItemCode.values) {
       futures.add(
-        StatRepository.fetchData( // StatRepository에서는 ItemCode에 해당하는 값들을 List로 넘겨줌.
+        StatRepository.fetchData(
+          // StatRepository에서는 ItemCode에 해당하는 값들을 List로 넘겨줌.
           itemCode: itemCode,
         ),
       );
@@ -38,16 +40,12 @@ class _HomeScreenState extends State<HomeScreen> {
     // await를 하면 futures에 들어가있던 모든 값들이 순서대로 들어온다.
     // 즉 results의 순서는 futures에 넣었던 순서대로 결과값을 받는다. 또한 해당 값들을 ItemCode(PM10, PM25, .. ,)같은 것들의 순서대로 들어갔다.
     // 그랬기 떄문에 아래에서 ItemCode.values[i] 와 results[i]에서 값을 얻을 수 있다.
-    for(int i=0; i< results.length; i++) {
+    for (int i = 0; i < results.length; i++) {
       final key = ItemCode.values[i];
       final value = results[i];
 
-      stats.addAll({
-        key: value
-      });
-
+      stats.addAll({key: value});
     }
-
     return stats;
   }
 
@@ -82,14 +80,27 @@ class _HomeScreenState extends State<HomeScreen> {
               );
             }
 
-            Map<ItemCode, List<StatModel>> stats = snapshot.data!;
             // 이건 가장 최근 데이터 . 가장 최근 데이터를 기준으로 우리가 statusLevel이 어느 구간인지를 산정해야함. 맨아래참조.
+            Map<ItemCode, List<StatModel>> stats = snapshot.data!;
             StatModel pm10RecentStat = stats[ItemCode.PM10]![0];
 
             final status = DataUtils.getStatusFromItemCodeAndValue(
               value: pm10RecentStat.seoul,
               itemCode: ItemCode.PM10,
             );
+
+            final ssModel = stats.keys.map((key) {
+              final value = stats[key]!;
+              final stat = value[0];
+
+              return StatAndStatusMdodel(
+                itemCode: key,
+                status: DataUtils.getStatusFromItemCodeAndValue(
+                    value: stat.getLevelFromRegion(region), itemCode: key),
+                stat: stat,
+              );
+            }).toList();
+
 
             return CustomScrollView(
               slivers: [
@@ -98,11 +109,14 @@ class _HomeScreenState extends State<HomeScreen> {
                   stat: pm10RecentStat,
                   status: status,
                 ),
-                const SliverToBoxAdapter(
+                SliverToBoxAdapter(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      CategoryCard(),
+                      CategoryCard(
+                        region: region,
+                        models: ssModel,
+                      ),
                       SizedBox(height: 16.0),
                       HourlyCard(),
                     ],

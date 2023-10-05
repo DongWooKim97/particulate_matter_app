@@ -28,7 +28,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     for (ItemCode itemCode in ItemCode.values) {
       futures.add(
-        StatRepository.fetchData(
+        StatRepository.fetchData( // StatRepository에서는 ItemCode에 해당하는 값들을 List로 넘겨줌.
           itemCode: itemCode,
         ),
       );
@@ -162,9 +162,12 @@ await를 하면 다음 로직이 실행이 안됐음.
 2. List<Future>  ~~   -> 이런식으로 선언하면 await하지 않은 함수들을 모을 수 있다.
 3. Future.wait(List<Future>) --> Future.wait를 하고 파라미터에 Future들이 모여있는 리스트를 넘겨주면 해당 리스트가 한번에 모든 요청이 가고,
     모든 요청의 응답이 돌아올 때 까지 기다릴 수 있음.
-4.
 
-이해하기 편하게, await를 하면 값이 돌아올 때 까지 기다린다. 그러나 await를 하지않고 async만 사용했다면 값이 돌아오기 전에도
-for-loop를 돈다. 그래서 모든 요청을 for-loop에 의해 한번에 보내고
-await Future.wait(List<Future>)를 하면  for-loop에 의해 보내졌던 async한 응답을 여기서 모조리 기다린 후에 로직을 실행한다.
+
+★★★★★
+    이해하기 편하게, await를 하면 값이 돌아올 때 까지 기다린다. 그러나 await를 하지않고 async만 사용했다면 값이 돌아오기 전에도
+    for-loop를 돈다. 그래서 모든 요청을 for-loop에 의해 한번에 보내고
+    await Future.wait(List<Future>)를 하면  for-loop에 의해 보내졌던 async한 응답을 여기서 모조리 기다린 후에 로직을 실행한다.
+★★★★★
+
 */

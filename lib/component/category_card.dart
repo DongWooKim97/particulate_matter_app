@@ -8,7 +8,7 @@ import 'main_stat.dart';
 
 class CategoryCard extends StatelessWidget {
   final String region;
-  final List<StatAndStatusMdodel> models;
+  final List<StatAndStatusModel> models;
 
   const CategoryCard({
     required this.region,

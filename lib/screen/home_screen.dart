@@ -93,7 +93,7 @@ class _HomeScreenState extends State<HomeScreen> {
               final value = stats[key]!;
               final stat = value[0];
 
-              return StatAndStatusMdodel(
+              return StatAndStatusModel(
                 itemCode: key,
                 status: DataUtils.getStatusFromItemCodeAndValue(
                     value: stat.getLevelFromRegion(region), itemCode: key),

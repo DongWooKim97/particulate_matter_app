@@ -1,4 +1,7 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:particulate_matter_app/component/category_card.dart';
 import 'package:particulate_matter_app/component/hourly_card.dart';
 import 'package:particulate_matter_app/component/main_app_bar.dart';
@@ -37,8 +40,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<Map<ItemCode, List<StatModel>>> fetchData() async {
-    Map<ItemCode, List<StatModel>> stats = {};
-
+    // Future를 리턴해주는 것은 함수가 async 함수이다 라는 것의 반증.
     List<Future> futures = []; // await하지 않은 함수들을 여기에 넣을 수 있음.
 
     for (ItemCode itemCode in ItemCode.values) {
@@ -50,17 +52,35 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     }
 
+    /*
+      여기부터 아래 코드가 정부API를 통해 가져온 데이터들을 Hive에 넣고 그것을 이용하는 코드이다.
+
+     */
+
     final results = await Future.wait(futures); // 이 리스트 안에 들어가있는 모든 Future이 끝날 떄까지 한번에 기다릴 수있다.
     // await를 하면 futures에 들어가있던 모든 값들이 순서대로 들어온다.
     // 즉 results의 순서는 futures에 넣었던 순서대로 결과값을 받는다. 또한 해당 값들을 ItemCode(PM10, PM25, .. ,)같은 것들의 순서대로 들어갔다.
     // 그랬기 떄문에 아래에서 ItemCode.values[i] 와 results[i]에서 값을 얻을 수 있다.
+
+    // Hive에 데이터 넣기.
     for (int i = 0; i < results.length; i++) {
       final key = ItemCode.values[i];
       final value = results[i];
 
-      stats.addAll({key: value});
+      final box = Hive.box<StatModel>(key.name);
+      for (StatModel stat in value) {
+        box.put(stat.dataTime.toString(), stat);
+      }
     }
-    return stats;
+    return ItemCode.values.fold<Map<ItemCode, List<StatModel>>>(
+      {}, // 초기값
+      (previousValue, itemCode) {
+        //메인로직
+        final box = Hive.box<StatModel>(itemCode.name);
+        previousValue.addAll({itemCode: box.values.toList()});
+        return previousValue;
+      },
+    );
   }
 
   scrollListener() {

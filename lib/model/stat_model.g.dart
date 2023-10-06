@@ -89,9 +89,7 @@ class StatModelAdapter extends TypeAdapter<StatModel> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is StatModelAdapter &&
-          runtimeType == other.runtimeType &&
-          typeId == other.typeId;
+      other is StatModelAdapter && runtimeType == other.runtimeType && typeId == other.typeId;
 }
 
 class ItemCodeAdapter extends TypeAdapter<ItemCode> {
@@ -148,7 +146,5 @@ class ItemCodeAdapter extends TypeAdapter<ItemCode> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is ItemCodeAdapter &&
-          runtimeType == other.runtimeType &&
-          typeId == other.typeId;
+      other is ItemCodeAdapter && runtimeType == other.runtimeType && typeId == other.typeId;
 }

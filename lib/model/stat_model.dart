@@ -6,19 +6,14 @@ part 'stat_model.g.dart';
 enum ItemCode {
   @HiveField(0)
   PM10,
-
   @HiveField(1)
   PM25,
-
   @HiveField(2)
   NO2,
-
   @HiveField(3)
   O3,
-
   @HiveField(4)
   CO,
-
   @HiveField(5)
   SO2,
 }

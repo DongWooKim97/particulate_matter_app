@@ -21,7 +21,8 @@ class _TestScreenState extends State<TestScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          ValueListenableBuilder<Box>( // 결국 스트림빌더와 동일하다 .
+          ValueListenableBuilder<Box>(
+            // 결국 스트림빌더와 동일하다 .
             valueListenable: Hive.box(testBox).listenable(), // 모든 박스에 존재하는 함수.
             builder: (context, box, widget) {
               // 빌드가 될 때 마다 실행됨. 즉 빌드될 때 마다 리스닝하고 있는 박스들으리 데이터들을 빌드될 때 마다 바로바로 받아볼 수 있는거임.
@@ -68,9 +69,7 @@ class _TestScreenState extends State<TestScreen> {
           ),
           ElevatedButton(
             onPressed: () {
-              Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => Test2Screen())
-              );
+              Navigator.of(context).push(MaterialPageRoute(builder: (_) => Test2Screen()));
             },
             child: Text(
               '다음 화면!!',

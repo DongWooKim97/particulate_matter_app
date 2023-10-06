@@ -6,18 +6,16 @@ import 'card_title.dart';
 import 'main_card.dart';
 
 class HourlyCard extends StatelessWidget {
-  final String category;
   final Color darkColor;
   final Color lightColor;
   final String region;
-  final List<StatModel> stats;
+  final ItemCode itemCode;
 
   const HourlyCard({
-    required this.category,
     required this.darkColor,
     required this.lightColor,
     required this.region,
-    required this.stats,
+    required this.itemCode,
     Key? key,
   }) : super(key: key);
 

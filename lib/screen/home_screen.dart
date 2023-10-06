@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:particulate_matter_app/component/category_card.dart';
@@ -39,7 +37,7 @@ class _HomeScreenState extends State<HomeScreen> {
     super.dispose();
   }
 
-  Future<Map<ItemCode, List<StatModel>>> fetchData() async {
+  Future<void> fetchData() async {
     // Future를 리턴해주는 것은 함수가 async 함수이다 라는 것의 반증.
     List<Future> futures = []; // await하지 않은 함수들을 여기에 넣을 수 있음.
 
@@ -54,7 +52,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
     /*
       여기부터 아래 코드가 정부API를 통해 가져온 데이터들을 Hive에 넣고 그것을 이용하는 코드이다.
-
      */
 
     final results = await Future.wait(futures); // 이 리스트 안에 들어가있는 모든 Future이 끝날 떄까지 한번에 기다릴 수있다.
@@ -72,15 +69,6 @@ class _HomeScreenState extends State<HomeScreen> {
         box.put(stat.dataTime.toString(), stat);
       }
     }
-    return ItemCode.values.fold<Map<ItemCode, List<StatModel>>>(
-      {}, // 초기값
-      (previousValue, itemCode) {
-        //메인로직
-        final box = Hive.box<StatModel>(itemCode.name);
-        previousValue.addAll({itemCode: box.values.toList()});
-        return previousValue;
-      },
-    );
   }
 
   scrollListener() {
@@ -96,8 +84,74 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    return ValueListenableBuilder<Box>(
+      // 어떤 Hive의 Box를 리스닝하고 있어야할까? -> 바로 미세먼지. 미세먼지 값을 통해 색을 정하고 그러기 때문.
+      valueListenable: Hive.box(ItemCode.PM10.name).listenable(),
+      builder: (context, box, widget) {
+        final recentStat = box.values.toList().first as StatModel;
+        final status = DataUtils.getStatusFromItemCodeAndValue(
+          value: recentStat.getLevelFromRegion(region), // 첫번째 StatModel을 가져올 수 있음
+          itemCode: ItemCode.PM10,
+        );
+
+        return Scaffold(
+          drawer: MainDrawer(
+            darkColor: status.darkColor,
+            lightColor: status.lightColor,
+            selectedRegion: region,
+            onRegionTap: (String region) {
+              setState(() {
+                this.region = region;
+              });
+              Navigator.of(context).pop(); // 화면에서 뒤로가기를 할 떄 사용하던 방식!
+            },
+          ),
+          body: Container(
+            color: status.primaryColor,
+            child: CustomScrollView(
+              controller: scrollController,
+              slivers: [
+                MainAppBar(
+                  isExpanded: isExpanded,
+                  region: region,
+                  stat: recentStat,
+                  status: status,
+                  dateTime: recentStat.dataTime,
+                ),
+                SliverToBoxAdapter(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      CategoryCard(
+                        region: region,
+                        darkColor: status.darkColor,
+                        lightColor: status.lightColor,
+                      ),
+                      SizedBox(height: 16.0),
+                      ...ItemCode.values.map((itemCode) {
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 16.0),
+                          child: HourlyCard(
+                            darkColor: status.darkColor,
+                            lightColor: status.lightColor,
+                            itemCode: itemCode,
+                            region: region,
+                          ),
+                        );
+                      }).toList(),
+                      SizedBox(height: 16.0),
+                    ],
+                  ), // 안에 들어가는 위젯들은 다 Sliver화 돼서 들어감.
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+
     return SafeArea(
-      child: FutureBuilder<Map<ItemCode, List<StatModel>>>(
+      child: ValueL<Map<ItemCode, List<StatModel>>>(
         future: fetchData(),
         builder: (context, snapshot) {
           //에러가 있을 때
@@ -139,66 +193,6 @@ class _HomeScreenState extends State<HomeScreen> {
               stat: stat,
             );
           }).toList();
-
-          return Scaffold(
-            drawer: MainDrawer(
-              darkColor: status.darkColor,
-              lightColor: status.lightColor,
-              selectedRegion: region,
-              onRegionTap: (String region) {
-                setState(() {
-                  this.region = region;
-                });
-                Navigator.of(context).pop(); // 화면에서 뒤로가기를 할 떄 사용하던 방식!
-              },
-            ),
-            body: Container(
-              color: status.primaryColor,
-              child: CustomScrollView(
-                controller: scrollController,
-                slivers: [
-                  MainAppBar(
-                    isExpanded: isExpanded,
-                    region: region,
-                    stat: pm10RecentStat,
-                    status: status,
-                    dateTime: pm10RecentStat.dataTime,
-                  ),
-                  SliverToBoxAdapter(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        CategoryCard(
-                          region: region,
-                          models: ssModel,
-                          darkColor: status.darkColor,
-                          lightColor: status.lightColor,
-                        ),
-                        SizedBox(height: 16.0),
-                        ...stats.keys.map((itemCode) {
-                          final stat = stats[itemCode]!;
-
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 16.0),
-                            child: HourlyCard(
-                              darkColor: status.darkColor,
-                              lightColor: status.lightColor,
-                              region: region,
-                              category: DataUtils.getItemCodeKoreanString(
-                                itemCode: itemCode,
-                              ),
-                              stats: stat,
-                            ),
-                          );
-                        }).toList(),
-                        SizedBox(height: 16.0),
-                      ],
-                    ), // 안에 들어가는 위젯들은 다 Sliver화 돼서 들어감.
-                  ),
-                ],
-              ),
-            ),
-          );
         },
       ),
     );
@@ -259,3 +253,15 @@ await를 하면 다음 로직이 실행이 안됐음.
 ★★★★★
 
 */
+
+// 하이브를 사용하는데, 굳이 fetchData를 사용해야하나?
+// 하이브만 사용해도 자동으로UI가 변동되는것을 TestScreen에서 확인을 했는데도?
+// 그래서 지금부터 로직을 조금은 변경할 것이다.
+
+// 현재는 홈스크린 안에서 이 데이터를 모두 저희가 관리를 하면서 이 데이터가
+// 하위 위젯으로 다 전달이 되게 설계해놓은 상태.
+// 그러나 이제 모든 데이터를 전달하지는 않을 것이다.
+// 어떻게 바꿀거임? -> 모든 위젯에서 공통적으로 필요한 부분만 저희가 이 홈스크린에서 제작을 해가지고 위젯들에
+// 집어 넣어주고, 나머지 위젯별로 다르게 필요한 데이터들은 그 각각의 위젯 속에서 알아서
+// 데이터를 가져오도록 할 것!
+// 또한
